@@ -19,12 +19,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List files 
-        run: ls 
-
       - name: Create .env
         run: |
           printf '%s\n' '${{ secrets.ENV_TEST }}' > spring-petclinic/.env
+
+      - name: List files 
+        run: cat .env 
 
       - name: Set up Java 17
         uses: actions/setup-java@v4

@@ -21,7 +21,7 @@ jobs:
 
       - name: Create .env
         run: |
-          printf '%s\n' '${{ secrets.ENV_TEST }}' > spring-petclinic/.env
+          printf '%s\n' '${{ secrets.ENV_TEST }}' > .env
 
       - name: List files 
         run: cat .env 

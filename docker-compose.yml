@@ -1,21 +1,48 @@
 services:
-  mysql:
-    image: mysql:9.7
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=
-      - MYSQL_ALLOW_EMPTY_PASSWORD=true
-      - MYSQL_USER=petclinic
-      - MYSQL_PASSWORD=petclinic
-      - MYSQL_DATABASE=petclinic
-    volumes:
-      - "./conf.d:/etc/mysql/conf.d:ro"
-  postgres:
-    image: postgres:18.4
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=petclinic
-      - POSTGRES_USER=petclinic
-      - POSTGRES_DB=petclinic
+    app: 
+      image: bbodda123/spring-petclinic:latest
+      ports:
+        - "8080:8080"
+      env_file:
+        - .env
+      networks:
+        - petclinic-network
+      depends_on:
+        postgres:
+          condition: service_healthy
+
+  # mysql:
+  #   image: mysql:9.7
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=
+  #     - MYSQL_ALLOW_EMPTY_PASSWORD=true
+  #     - MYSQL_USER=petclinic
+  #     - MYSQL_PASSWORD=petclinic
+  #     - MYSQL_DATABASE=petclinic
+  #   volumes:
+  #     - "./conf.d:/etc/mysql/conf.d:ro"
+    postgres:
+      image: postgres:18
+      ports:
+        - "5432:5432"
+      env_file:
+        - .env
+      volumes:
+        - postgres-data:/var/lib/postgresql/data
+      networks:
+        - petclinic-network
+      expose:
+        - "5432"
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+        interval: 5s
+        timeout: 5s
+        retries: 3
+        
+networks:
+  petclinic-network:
+
+volumes:
+  postgres-data:

@@ -19,11 +19,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env
-        run: |
-          printf '%s\n' '${{ secrets.ENV_TEST }}' > .env
+      # - name: Create .env
+      #   run: |
+      #     printf '%s\n' '${{ secrets.ENV_TEST }}' > .env
 
-      - name: List files 
+      - name: List env file contents 
         run: cat .env 
 
       - name: Set up Java 17

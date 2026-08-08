@@ -6,9 +6,13 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ main ]
+    paths: 
+      - '/k8s/**'
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
+    paths: 
+      - '/k8s/**'
+  workflow_dispatch: 
 jobs:
   build:
 

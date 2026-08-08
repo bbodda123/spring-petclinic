@@ -21,7 +21,10 @@ jobs:
 
       - name: Create .env
         run: |
-          printf '%s\n' '${{ secrets.ENV_TEST }}' > .env
+          printf '%s\n' '${{ secrets.ENV_TEST }}' > spring-petclinic/.env
+          
+      - name: List files 
+        run: ls 
 
       - name: Set up Java 17
         uses: actions/setup-java@v4

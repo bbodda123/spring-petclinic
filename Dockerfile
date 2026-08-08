@@ -22,8 +22,10 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 
 # Copy the jar to the production image from the builder stage. and change ownership to the spring user
-COPY --from=builder --chown=spring:spring /app/target/*.jar app.jar
+COPY --from=builder --chown=spring:spring /app/target/spring-petclinic-4.0.0-SNAPSHOT.jar app.jar
 
 USER spring
+
 EXPOSE 8080
+
 ENTRYPOINT ["java","-jar","app.jar"]

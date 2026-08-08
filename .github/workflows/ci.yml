@@ -35,7 +35,6 @@ jobs:
           name: test-reports
           path: |
             target/surefire-reports/**
-            target/site/**
           if-no-files-found: warn
 
   docker-publish:

@@ -2,11 +2,8 @@ version: '3.8'
 services:
   spring-petclinic:
     image: "{{ docker_image }}:{{ tag }}"
-    environment:
-      - SPRING_PROFILES_ACTIVE=postgres 
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://terraform-20260826084219363000000001.cwx6qq6aqkj8.us-east-1.rds.amazonaws.com:5432/petclinic
-      - SPRING_DATASOURCE_USERNAME=petclinic
-      - SPRING_DATASOURCE_PASSWORD=petclinic
+    env_file:
+      - .env
     user: "{{ spring_app.run_uid }}:{{ spring_app.run_gid }}"
     ports:
       - "{{ spring_app.bind_host }}:{{ spring_app.spring_port }}:8080"

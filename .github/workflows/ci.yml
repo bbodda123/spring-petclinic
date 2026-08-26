@@ -69,3 +69,63 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/spring-petclinic:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/spring-petclinic:${{ github.sha }}
+  
+  deploy:
+    name: Deploy via Ansible to Remote Server
+    needs: docker-publish
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    environment: ansible
+    env:
+      SSH_USER: ubuntu
+      ANSIBLE_HOST_KEY_CHECKING: 'False'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: feat/infra-ansible
+          fetch-depth: 0
+
+      - name : List files 
+        run: |
+          echo "Listing files in the current directory:"
+          ls -la
+
+      - name: Create SSH key from secret
+        run: |
+          mkdir -p "$HOME/.ssh"
+          echo "Writing SSH key to $HOME/.ssh/petclinic.pem"
+          printf "%s" "${{ secrets.DEPLOY_KEY }}" > "$HOME/.ssh/petclinic.pem"
+          chmod 600 "$HOME/.ssh/petclinic.pem"
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Test SSH connectivity
+        run: |
+          echo "Testing SSH to ${{ secrets.HOST_PUBLIC_IP }} as $SSH_USER"
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -i "$HOME/.ssh/petclinic.pem" "$SSH_USER@${{ secrets.HOST_PUBLIC_IP }}" 'echo SSH_OK'
+      
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-pip ssh
+          python3 -m pip install --user ansible
+          export PATH="$HOME/.local/bin:$PATH"
+
+      - name: Ansible ad-hoc ping
+        run: |
+          echo "Running ansible ping against inventory in /opt/ansible"
+          $HOME/.local/bin/ansible -i inventory/hosts.yml -m ping -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
+      
+      - name: Create .env from secret for deploy_app role
+        run: |
+          touch  roles/deploy_app/files/.env
+          printf "%s" "${{ secrets.ENV_FILE }}" > roles/deploy_app/files/.env
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+
+      - name: Run Ansible playbook
+        run: |
+          echo "Running ansible-playbook site.yml from /opt/ansible"
+          $HOME/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"

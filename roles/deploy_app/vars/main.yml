@@ -1,0 +1,4 @@
+app_dir: /opt/spring-app
+
+docker_image: "bbodda123/spring-petclinic"
+tag: "latest"

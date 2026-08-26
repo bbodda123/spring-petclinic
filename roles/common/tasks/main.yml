@@ -1,0 +1,53 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Ensure essentials installed
+  apt:
+    name: [curl, git, ufw, fail2ban, unzip]
+    state: present
+    update_cache: yes
+
+- name: Ensure timezone is set to UTC
+  timezone:
+    name: UTC
+
+- name: Ensure unattended-upgrades installed
+  apt:
+    name: unattended-upgrades
+    state: present
+
+- name: Create deploy user
+  user:
+    name: deploy
+    comment: Deploy user
+    create_home: yes
+    shell: /bin/bash
+    groups: sudo
+    state: present
+
+- name: Add deploy user to docker group if docker exists
+  user:
+    name: deploy
+    groups: docker
+    append: yes
+  when: "ansible_facts.packages is defined and ('docker-ce' in ansible_facts.packages or 'docker' in ansible_facts.packages)"
+
+- name: Disable root SSH login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+    create: yes
+    backup: yes
+  notify: restart ssh
+
+- name: Disable SSH password authentication
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    create: yes
+    backup: yes
+  notify: restart ssh

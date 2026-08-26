@@ -1,0 +1,5 @@
+# Encrypted secrets should go here. This file is a placeholder.
+# Use `ansible-vault edit group_vars/all/vault.yml` to add secrets.
+
+docker_hub_token: ""
+db_password: ""

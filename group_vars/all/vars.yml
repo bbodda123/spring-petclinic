@@ -1,0 +1,21 @@
+spring_app:
+  app_version: "latest"
+  spring_port: 8080
+  domain: ec2-54-224-99-159.compute-1.amazonaws.com
+  admin_email: abdelrahmanhassanwork1@gmail.com
+  # Hardening/runtime limits for the container
+  run_uid: 1000
+  run_gid: 1000
+  mem_limit: "512m"
+  cpus: "0.5"
+  read_only: true
+  # Bind address for host port mapping. Set to 0.0.0.0 to expose externally.
+  bind_host: 0.0.0.0
+  # If true, allow port 8080 in UFW to expose the app directly. Recommended: false if using nginx reverse proxy.
+  expose_app_port: true
+  tmp_writable_paths:
+    - /tmp
+    - /logs
+  cap_drop:
+    - NET_ADMIN
+    - SYS_ADMIN

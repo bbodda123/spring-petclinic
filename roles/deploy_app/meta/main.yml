@@ -1,0 +1,4 @@
+galaxy_info:
+  author: petclinic
+  description: Deploy Spring Boot app via Docker
+  license: MIT

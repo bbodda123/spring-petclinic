@@ -1,0 +1,64 @@
+- name: Install packages for repository over HTTPS
+  apt:
+    name: [apt-transport-https, ca-certificates, curl, gnupg-agent, software-properties-common]
+    state: present
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Install docker packages
+  apt:
+    name: [docker-ce, docker-ce-cli, containerd.io]
+    state: present
+    update_cache: yes
+
+- name: Install Docker Compose plugin
+  apt:
+    name: docker-compose-plugin
+    state: present
+    update_cache: yes
+
+- name: Ensure docker group exists
+  group:
+    name: docker
+    state: present
+
+- name: Verify Docker Compose plugin is available
+  command: docker compose version
+  register: docker_compose_check
+  changed_when: false
+  failed_when: docker_compose_check.rc != 0
+
+- name: Install Python Docker SDK
+  apt:
+    name:
+      - python3-docker
+    state: present
+    update_cache: yes
+
+- name: Create /etc/docker directory
+  file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+
+- name: Deploy daemon.json
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure docker service enabled and started
+  service:
+    name: docker
+    state: started
+    enabled: yes

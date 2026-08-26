@@ -11,6 +11,14 @@
     src: docker-compose.yml.j2
     dest: "{{ app_dir }}/docker-compose.yml"
 
+- name: Copy .env file to server
+  ansible.builtin.copy:
+    src: files/.env
+    dest: "{{ app_dir }}/.env"
+    owner: ubuntu
+    group: ubuntu
+    mode: '0600'
+
 - name: Pull and run application via docker compose
   ansible.builtin.command:
     chdir: "{{ app_dir }}"

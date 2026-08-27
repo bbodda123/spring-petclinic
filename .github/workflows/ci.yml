@@ -166,7 +166,7 @@ jobs:
       - name: Ansible ad-hoc ping
         run: |
           echo "Running ansible ping against inventory in /opt/ansible"
-          $HOME/.local/bin/ansible -i inventory/hosts.yml -m ping -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
+          $HOME/.local/bin/ansible -i inventory/hosts.yml -m ping
       
       - name: Create .env from secret for deploy_app role
         env:
@@ -178,7 +178,7 @@ jobs:
       - name: Run Ansible playbook
         run: |
           echo "Running ansible-playbook site.yml from /opt/ansible"
-          $HOME/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
+          $HOME/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml
 
       - name: Allow GitHub runner to destroy Terraform Role
         if: always()

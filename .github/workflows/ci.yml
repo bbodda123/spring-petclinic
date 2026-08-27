@@ -166,7 +166,7 @@ jobs:
       - name: Ansible ad-hoc ping
         run: |
           echo "Running ansible ping against inventory in /opt/ansible"
-          $HOME/.local/bin/ansible -i inventory/hosts.yml -m ping
+          $HOME/.local/bin/ansible all -i inventory/hosts.yml -m ping
       
       - name: Create .env from secret for deploy_app role
         env:

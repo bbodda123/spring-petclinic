@@ -1,7 +1,7 @@
 spring_app:
   app_version: "latest"
   spring_port: 8080
-  domain: ec2-54-224-99-159.compute-1.amazonaws.com
+  domain: ec2-98-94-118-152.compute-1.amazonaws.com
   admin_email: abdelrahmanhassanwork1@gmail.com
   # Hardening/runtime limits for the container
   run_uid: 1000

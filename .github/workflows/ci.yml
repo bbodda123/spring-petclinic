@@ -131,7 +131,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "Writing SSH key to $HOME/.ssh/petclinic.pem"
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/petclinic.pem
+          printf '%s\n' "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/petclinic.pem
           chmod 600 ~/.ssh/petclinic.pem
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

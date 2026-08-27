@@ -125,7 +125,7 @@ jobs:
 
       - name: Allow GitHub runner SSH access
         working-directory: terraform
-        run: terraform apply 
+        run: terraform apply -auto-approve
 
       - name: Create SSH key from secret
         run: |
@@ -168,4 +168,4 @@ jobs:
       - name: Allow GitHub runner to destroy Terraform Role
         if: always()
         working-directory: terraform
-        run: terraform destroy 
+        run: terraform destroy -auto-approve

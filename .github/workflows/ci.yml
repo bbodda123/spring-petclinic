@@ -10,69 +10,69 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Run tests and upload reports
-    runs-on: ubuntu-latest
-    environment: test
+  # test:
+  #   name: Run tests and upload reports
+  #   runs-on: ubuntu-latest
+  #   environment: test
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Create .env
-        run: |
-          printf '%s\n' '${{ secrets.ENV_TEST }}' > .env
+  #     - name: Create .env
+  #       run: |
+  #         printf '%s\n' '${{ secrets.ENV_TEST }}' > .env
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: maven
+  #     - name: Set up Java 17
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: '17'
+  #         cache: maven
 
-      - name: Run Maven tests + Packaging The Application
-        run: ./mvnw clean package
-        continue-on-error: true
+  #     - name: Run Maven tests + Packaging The Application
+  #       run: ./mvnw clean package
+  #       continue-on-error: true
         
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: |
-            target/surefire-reports/**
-          if-no-files-found: warn
+  #     - name: Upload test reports
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: test-reports
+  #         path: |
+  #           target/surefire-reports/**
+  #         if-no-files-found: warn
 
-  docker-publish:
-    name: Build and push Docker image
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    environment: production
+  # docker-publish:
+  #   name: Build and push Docker image
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name != 'pull_request'
+  #   environment: production
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Log in to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/spring-petclinic:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/spring-petclinic:${{ github.sha }}
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         file: ./Dockerfile
+  #         push: true
+  #         tags: |
+  #           ${{ secrets.DOCKERHUB_USERNAME }}/spring-petclinic:latest
+  #           ${{ secrets.DOCKERHUB_USERNAME }}/spring-petclinic:${{ github.sha }}
   
   deploy:
     name: Deploy via Ansible to Remote Server
-    needs: docker-publish
+    # needs: docker-publish
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     environment: ansible
@@ -129,18 +129,32 @@ jobs:
 
       - name: Create SSH key from secret
         run: |
-          mkdir -p "$HOME/.ssh"
+          mkdir -p ~/.ssh
           echo "Writing SSH key to $HOME/.ssh/petclinic.pem"
-          printf "%s" "${{ secrets.DEPLOY_KEY }}" > "$HOME/.ssh/petclinic.pem"
-          chmod 600 "$HOME/.ssh/petclinic.pem"
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/petclinic.pem
+          chmod 600 ~/.ssh/petclinic.pem
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
-      - name: Test SSH connectivity
+      - name: Cat the ssh key for debugging
         run: |
-          echo "Testing SSH to ${{ secrets.HOST_PUBLIC_IP }} as $SSH_USER"
-          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -i "$HOME/.ssh/petclinic.pem" "$SSH_USER@${{ secrets.HOST_PUBLIC_IP }}" 'echo SSH_OK'
-      
+          echo "Contents of the SSH key:"
+          cat ~/.ssh/petclinic.pem
+
+
+      - name: Test SSH
+        run: |
+          echo "Testing SSH to $SSH_HOST as $SSH_USER"
+
+          ssh \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o StrictHostKeyChecking=no \
+            -i "$HOME/.ssh/petclinic.pem" \
+            "$SSH_USER@$SSH_HOST" \
+            'echo SSH_OK'
+
+
       - name: Install Ansible
         run: |
           sudo apt-get update

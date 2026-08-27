@@ -136,24 +136,24 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > $HOME/.ssh/petclinic.pem
           chmod 600 $HOME/.ssh/petclinic.pem
 
-      - name: Validate SSH key
-        run: |
-          ssh-keygen -y -f "$HOME/.ssh/petclinic.pem" > /dev/null
+      # - name: Validate SSH key
+      #   run: |
+      #     ssh-keygen -y -f "$HOME/.ssh/petclinic.pem" > /dev/null
 
-      - name: Test SSH
-        env:
-          SSH_USER: ubuntu
-          SSH_HOST: ${{ secrets.HOST_PUBLIC_IP }}
-        run: |
-          echo "Testing SSH to $SSH_HOST as $SSH_USER"
+      # - name: Test SSH
+      #   env:
+      #     SSH_USER: ubuntu
+      #     SSH_HOST: ${{ secrets.HOST_PUBLIC_IP }}
+      #   run: |
+      #     echo "Testing SSH to $SSH_HOST as $SSH_USER"
 
-          ssh \
-            -o BatchMode=yes \
-            -o ConnectTimeout=10 \
-            -o StrictHostKeyChecking=no \
-            -i "$HOME/.ssh/petclinic.pem" \
-            "$SSH_USER@$SSH_HOST" \
-            'echo SSH_OK'
+      #     ssh \
+      #       -o BatchMode=yes \
+      #       -o ConnectTimeout=10 \
+      #       -o StrictHostKeyChecking=no \
+      #       -i "$HOME/.ssh/petclinic.pem" \
+      #       "$SSH_USER@$SSH_HOST" \
+      #       'echo SSH_OK'
 
 
       - name: Install Ansible

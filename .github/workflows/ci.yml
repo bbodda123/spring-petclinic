@@ -128,19 +128,17 @@ jobs:
         run: terraform apply -auto-approve
 
       - name: Create SSH key from secret
-        run: |
-          mkdir -p ~/.ssh
-          echo "Writing SSH key to $HOME/.ssh/petclinic.pem"
-          printf '%s\n' "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/petclinic.pem
-          chmod 600 ~/.ssh/petclinic.pem
         env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-
-      - name: Cat the ssh key for debugging
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
-          echo "Contents of the SSH key:"
-          cat ~/.ssh/petclinic.pem
+          mkdir -p $HOME/.ssh
+          echo "Writing SSH key to $HOME/.ssh/petclinic.pem"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > $HOME/.ssh/petclinic.pem
+          chmod 600 $HOME/.ssh/petclinic.pem
 
+      - name: Validate SSH key
+        run: |
+          ssh-keygen -y -f "$HOME/.ssh/petclinic.pem" > /dev/null
 
       - name: Test SSH
         env:
@@ -153,7 +151,7 @@ jobs:
             -o BatchMode=yes \
             -o ConnectTimeout=10 \
             -o StrictHostKeyChecking=no \
-            -i "~/.ssh/petclinic.pem" \
+            -i "$HOME/.ssh/petclinic.pem" \
             "$SSH_USER@$SSH_HOST" \
             'echo SSH_OK'
 
@@ -168,19 +166,19 @@ jobs:
       - name: Ansible ad-hoc ping
         run: |
           echo "Running ansible ping against inventory in /opt/ansible"
-          ~/.local/bin/ansible -i inventory/hosts.yml -m ping -u "$SSH_USER" --private-key "~/.ssh/petclinic.pem"
+          $HOME/.local/bin/ansible -i inventory/hosts.yml -m ping -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
       
       - name: Create .env from secret for deploy_app role
-        run: |
-          touch  roles/deploy_app/files/.env
-          printf "%s" "${{ secrets.ENV_FILE }}" > roles/deploy_app/files/.env
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          mkdir -p roles/deploy_app/files
+          printf '%s' "$ENV_FILE" > roles/deploy_app/files/.env
 
       - name: Run Ansible playbook
         run: |
           echo "Running ansible-playbook site.yml from /opt/ansible"
-          ~/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "~/.ssh/petclinic.pem"
+          $HOME/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
 
       - name: Allow GitHub runner to destroy Terraform Role
         if: always()

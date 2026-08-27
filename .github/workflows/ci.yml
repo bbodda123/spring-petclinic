@@ -143,6 +143,9 @@ jobs:
 
 
       - name: Test SSH
+        env:
+          SSH_USER: ubuntu
+          SSH_HOST: ${{ secrets.HOST_PUBLIC_IP }}
         run: |
           echo "Testing SSH to $SSH_HOST as $SSH_USER"
 
@@ -150,7 +153,7 @@ jobs:
             -o BatchMode=yes \
             -o ConnectTimeout=10 \
             -o StrictHostKeyChecking=no \
-            -i "$HOME/.ssh/petclinic.pem" \
+            -i "~/.ssh/petclinic.pem" \
             "$SSH_USER@$SSH_HOST" \
             'echo SSH_OK'
 
@@ -165,7 +168,7 @@ jobs:
       - name: Ansible ad-hoc ping
         run: |
           echo "Running ansible ping against inventory in /opt/ansible"
-          $HOME/.local/bin/ansible -i inventory/hosts.yml -m ping -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
+          ~/.local/bin/ansible -i inventory/hosts.yml -m ping -u "$SSH_USER" --private-key "~/.ssh/petclinic.pem"
       
       - name: Create .env from secret for deploy_app role
         run: |
@@ -177,7 +180,7 @@ jobs:
       - name: Run Ansible playbook
         run: |
           echo "Running ansible-playbook site.yml from /opt/ansible"
-          $HOME/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
+          ~/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "~/.ssh/petclinic.pem"
 
       - name: Allow GitHub runner to destroy Terraform Role
         if: always()

@@ -7,5 +7,5 @@ resource "aws_vpc_security_group_ingress_rule" "github_runner_ssh" {
   from_port   = 22
   to_port     = 22
 
-  cidr_ipv4 = "${locals.admin_cidr}"
+  cidr_ipv4 = local.admin_cidr
 }

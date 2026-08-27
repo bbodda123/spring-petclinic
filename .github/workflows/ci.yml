@@ -91,17 +91,33 @@ jobs:
           ref: feat/infra-ansible
           fetch-depth: 0
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity  
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
+
+      - name : List files 
+        run: |
+          echo "Listing files in the current directory:"
+          ls -la
+
+      - name: Configure AWS credentials (static keys)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Verify AWS identity (test login)
+        run: |
+          echo "Checking AWS caller identity..."
+          aws sts get-caller-identity
+
+      - name: Fail fast if not authenticated
+        run: |
+          if ! aws sts get-caller-identity > /dev/null 2>&1; then
+            echo "AWS authentication failed"
+            exit 1
+          fi
+          echo "AWS authentication succeeded"
 
       - name: Terraform Init
         working-directory: terraform
@@ -110,11 +126,6 @@ jobs:
       - name: Allow GitHub runner SSH access
         working-directory: terraform
         run: terraform apply 
-
-      - name : List files 
-        run: |
-          echo "Listing files in the current directory:"
-          ls -la
 
       - name: Create SSH key from secret
         run: |

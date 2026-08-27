@@ -79,6 +79,10 @@ jobs:
     env:
       SSH_USER: ubuntu
       ANSIBLE_HOST_KEY_CHECKING: 'False'
+    permissions:
+      id-token: write
+      contents: read
+
 
     steps:
       - name: Checkout code
@@ -86,6 +90,26 @@ jobs:
         with:
           ref: feat/infra-ansible
           fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity  
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Allow GitHub runner SSH access
+        working-directory: terraform
+        run: terraform apply 
 
       - name : List files 
         run: |
@@ -129,3 +153,8 @@ jobs:
         run: |
           echo "Running ansible-playbook site.yml from /opt/ansible"
           $HOME/.local/bin/ansible-playbook -i inventory/hosts.yml site.yml -u "$SSH_USER" --private-key "$HOME/.ssh/petclinic.pem"
+
+      - name: Allow GitHub runner to destroy Terraform Role
+        if: always()
+        working-directory: terraform
+        run: terraform destroy 

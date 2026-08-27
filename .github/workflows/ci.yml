@@ -93,12 +93,7 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
-
-      - name : List files 
-        run: |
-          echo "Listing files in the current directory:"
-          ls -la
-
+        
       - name: Configure AWS credentials (static keys)
         uses: aws-actions/configure-aws-credentials@v6
         with:

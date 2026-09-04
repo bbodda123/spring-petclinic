@@ -1,0 +1,8 @@
+user-data.sh
+terraform.tfvars
+terraform.tfstate
+.terraform/*
+boom.md
+accesskey
+.terraform.lock.hcl
+petclinic.pem

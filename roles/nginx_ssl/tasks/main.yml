@@ -3,19 +3,21 @@
     name: nginx
     state: present
 
-# - name: Install certbot and nginx plugin
-#   apt:
-#     name: [certbot, python3-certbot-nginx]
-#     state: present
-#     update_cache: yes
+- name: Install certbot and nginx plugin
+  apt:
+    name: [certbot, python3-certbot-nginx]
+    state: present
+    update_cache: yes
 
-- name: Deploy nginx site for petclinic
-  template:
+- name: Deploy Nginx configuration
+  ansible.builtin.template:
     src: petclinic.conf.j2
     dest: /etc/nginx/sites-available/petclinic.conf
     owner: root
     group: root
     mode: '0644'
+    validate: 'nginx -t -c %s'
+  notify: restart nginx
 
 - name: Ensure site enabled
   file:
@@ -24,18 +26,34 @@
     state: link
   notify: restart nginx
 
-# - name: Obtain TLS certificate with certbot
-#   command: >
-#     certbot --nginx -n --agree-tos --redirect 
-#     --email {{ spring_app.admin_email }} 
-#     -d {{ spring_app.domain }}
-#   args:
-#     creates: /etc/letsencrypt/live/{{ spring_app.domain }}
-#   notify: restart nginx
+- name: Disable default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
 
-# - name: Ensure certbot renew cron
-#   cron:
-#     name: "certbot renew"
-#     job: 'certbot renew --post-hook "systemctl reload nginx"'
-#     minute: '0'
-#     hour: '3'
+- name: Ensure nginx is enabled and started
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Obtain SSL certificate
+  ansible.builtin.command:
+    cmd: >
+      certbot --nginx
+      --non-interactive
+      --agree-tos
+      --redirect
+      --email {{ spring_app.admin_email }}
+      -d {{ spring_app.domain }}
+  args:
+    creates: "/etc/letsencrypt/live/{{ spring_app.domain }}/fullchain.pem"
+  notify: restart nginx
+
+- name: Configure certbot renewal
+  ansible.builtin.cron:
+    name: "Certbot renewal"
+    job: 'certbot renew --quiet --post-hook "systemctl reload nginx"'
+    minute: "0"
+    hour: "3"

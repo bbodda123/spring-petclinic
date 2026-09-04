@@ -1,8 +1,11 @@
 spring_app:
   app_version: "latest"
   spring_port: 8080
-  domain: ec2-98-94-118-152.compute-1.amazonaws.com
+  domain: spring.abdelrahman-hassan.online
   admin_email: abdelrahmanhassanwork1@gmail.com
+  # ansible_user and ansible_host are used to connect to the remote host. Update these values with your actual SSH username and the public IP address of your server.
+  ansible_user: ubuntu
+  ansible_host: 98.82.240.40
   # Hardening/runtime limits for the container
   run_uid: 1000
   run_gid: 1000

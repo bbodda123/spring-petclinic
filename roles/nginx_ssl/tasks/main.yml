@@ -16,7 +16,6 @@
     owner: root
     group: root
     mode: '0644'
-    validate: 'nginx -t -c %s'
   notify: restart nginx
 
 - name: Ensure site enabled
@@ -31,6 +30,11 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
   notify: restart nginx
+
+- name: Validate Nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
 
 - name: Ensure nginx is enabled and started
   ansible.builtin.service:

@@ -1,5 +1,5 @@
 resource "aws_vpc_security_group_ingress_rule" "github_runner_ssh" {
-  security_group_id = "sg-080651a0c55c34a6a"
+  security_group_id = "sg-014afded2a4f4ab4e"
 
   description = "SSH from GitHub Actions runner"
 

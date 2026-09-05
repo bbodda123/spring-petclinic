@@ -22,12 +22,6 @@ services:
       - no-new-privileges:true
     mem_limit: "{{ spring_app.mem_limit }}"
     cpus: "{{ spring_app.cpus }}"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://{{ spring_app.bind_host }}:{{ spring_app.spring_port }}/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
     logging:
       driver: json-file
       options:

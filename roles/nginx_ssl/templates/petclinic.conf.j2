@@ -5,7 +5,7 @@ server {
     server_name {{ spring_app.domain }};
 
     location / {
-        proxy_pass http://127.0.0.1:{{ spring_app.spring_port }};
+        proxy_pass http://{{ spring_app.bind_host }}:{{ spring_app.spring_port }};
 
         proxy_http_version 1.1;
 

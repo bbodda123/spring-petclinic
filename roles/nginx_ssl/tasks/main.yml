@@ -9,7 +9,7 @@
     state: present
     update_cache: yes
 
-- name: Deploy Nginx configuration
+- name: Deploy initial HTTP Nginx configuration
   ansible.builtin.template:
     src: petclinic.conf.j2
     dest: /etc/nginx/sites-available/petclinic.conf
@@ -18,7 +18,7 @@
     mode: '0644'
   notify: restart nginx
 
-- name: Ensure site enabled
+- name: Ensure Petclinic site enabled
   file:
     src: /etc/nginx/sites-available/petclinic.conf
     dest: /etc/nginx/sites-enabled/petclinic.conf
@@ -31,10 +31,11 @@
     state: absent
   notify: restart nginx
 
-- name: Validate Nginx configuration
-  ansible.builtin.command:
-    cmd: nginx -t
-  changed_when: false
+- name: Ensure Nginx is started
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
 
 - name: Ensure nginx is enabled and started
   ansible.builtin.service:
@@ -42,7 +43,7 @@
     state: started
     enabled: true
 
-- name: Obtain SSL certificate
+- name: Obtain SSL certificate and configure HTTPS
   ansible.builtin.command:
     cmd: >
       certbot --nginx
@@ -53,7 +54,11 @@
       -d {{ spring_app.domain }}
   args:
     creates: "/etc/letsencrypt/live/{{ spring_app.domain }}/fullchain.pem"
-  notify: restart nginx
+
+- name: Validate Nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
 
 - name: Configure certbot renewal
   ansible.builtin.cron:

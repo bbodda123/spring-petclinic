@@ -34,3 +34,6 @@ output "rds_database_name" {
 output "ssh_command" {
   value = "ssh -i ./petclinic.pem ubuntu@${aws_eip.app_eip.public_ip}"
 }
+output "ec2_security_group_id" {
+  value = aws_security_group.ec2_sg.id
+}

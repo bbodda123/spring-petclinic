@@ -2,6 +2,6 @@ data "external" "my_ip" {
   program = [
     "bash",
     "-c",
-    "curl -s https://api.ipify.org | awk '{printf \"{\\\"ip\\\":\\\"%s\\\"}\\n\", $0}'"
+    "ip=$(curl -s https://api.ipify.org) && jq -n --arg ip \"$ip\" '{ip: $ip}'"
   ]
 }

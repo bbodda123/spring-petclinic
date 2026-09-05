@@ -6,3 +6,4 @@ boom.md
 accesskey
 .terraform.lock.hcl
 petclinic.pem
+terraform.tfstate.backup

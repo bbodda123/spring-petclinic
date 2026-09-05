@@ -13,7 +13,7 @@ spring_app:
   cpus: "0.5"
   read_only: true
   # Bind address for host port mapping. Set to 0.0.0.0 to expose externally.
-  bind_host: 0.0.0.0
+  bind_host: 127.0.0.1
   # If true, allow port 8080 in UFW to expose the app directly. Recommended: false if using nginx reverse proxy.
   expose_app_port: true
   tmp_writable_paths:
